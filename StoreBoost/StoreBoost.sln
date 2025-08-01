@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36327.8 d17.14
+VisualStudioVersion = 17.14.36327.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoreBoost.Api", "StoreBoost.Api\StoreBoost.Api.csproj", "{37DDF684-3352-4868-A2BF-78CD39AD2FE9}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoreBoost.Persistence", "StoreBoost.Persistence\StoreBoost.Persistence.csproj", "{C589D5C1-9C47-4FD3-BE83-F9C56C63D7ED}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoreBoost.Shared", "StoreBoost.Shared\StoreBoost.Shared.csproj", "{0E0F3556-4308-49E1-B4E9-197D0D95A317}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoreBoost.Tests", "StoreBoost.Tests\StoreBoost.Tests.csproj", "{42CD9838-111E-419F-AA72-EBFE8D0DD745}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{0E0F3556-4308-49E1-B4E9-197D0D95A317}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E0F3556-4308-49E1-B4E9-197D0D95A317}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E0F3556-4308-49E1-B4E9-197D0D95A317}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42CD9838-111E-419F-AA72-EBFE8D0DD745}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42CD9838-111E-419F-AA72-EBFE8D0DD745}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42CD9838-111E-419F-AA72-EBFE8D0DD745}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42CD9838-111E-419F-AA72-EBFE8D0DD745}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
