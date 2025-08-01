@@ -1,11 +1,14 @@
 # StoreBoost Test
+
 Your task is to implement the appointment booking feature.
-Feature Request: As a user viewing the list of appointments, I want to be able to click on an "Available" slot to book it. Once I book a slot, its status should change to "Booked," and it should no longer be bookable.
-Acceptance Criteria:
-•	A user can click on an "Available" appointment slot.
-•	After clicking, the backend must be updated to mark the slot as "Booked."
-•	The user interface must update to show the new "Booked" status without needing to refresh the page.
-•	Once a slot is "Booked," clicking on it again should have no effect.
+
+**Feature Request:** As a user viewing the list of appointments, I want to be able to click on an "Available" slot to book it. Once I book a slot, its status should change to "Booked," and it should no longer be bookable.
+
+**Acceptance Criteria:**
+- A user can click on an "Available" appointment slot.
+- After clicking, the backend must be updated to mark the slot as "Booked."
+- The user interface must update to show the new "Booked" status without needing to refresh the page.
+- Once a slot is "Booked," clicking on it again should have no effect. 
 
 
 # 🧪 StoreBoost Backend Setup Summary – Technical Test Report
