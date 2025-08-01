@@ -1,7 +1,9 @@
 ﻿using FluentAssertions;
 using Moq;
+using Microsoft.Extensions.Logging;
 using StoreBoost.Application.Features.Slots.Commands.BookSlot;
 using StoreBoost.Application.Interfaces;
+using StoreBoost.Application.Exceptions;
 
 
 namespace StoreBoost.Tests.Features.Slots.Commands.BookSlot
@@ -13,47 +15,53 @@ namespace StoreBoost.Tests.Features.Slots.Commands.BookSlot
     {
         private readonly Mock<ISlotRepository> _mockRepository;
         private readonly Mock<INotificationService> _mockNotifier;
+        private readonly Mock<ILogger<BookSlotCommandHandler>> _mockLogger;
         private readonly BookSlotCommandHandler _handler;
 
         public BookSlotCommandHandlerTests()
         {
             _mockRepository = new Mock<ISlotRepository>();
             _mockNotifier = new Mock<INotificationService>();
+            _mockLogger = new Mock<ILogger<BookSlotCommandHandler>>();
 
-            _handler = new BookSlotCommandHandler(_mockRepository.Object, _mockNotifier.Object);
+            _handler = new BookSlotCommandHandler(
+                _mockRepository.Object,
+                _mockNotifier.Object,
+                _mockLogger.Object
+            );
         }
 
         [Fact]
-        public async Task Should_Return_Failure_If_Slot_Not_Found()
+        public async Task Should_Throw_SlotNotFoundException_When_Slot_Is_Null()
         {
-            _mockRepository.Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync((AppointmentSlot?)null);
-
+            // Arrange
             var command = new BookSlotCommand(Guid.NewGuid());
+            _mockRepository.Setup(r => r.GetByIdAsync(command.SlotId)).ReturnsAsync((AppointmentSlot?)null);
 
-            var result = await _handler.Handle(command, default);
+            // Act
+            var act = async () => await _handler.Handle(command, default);
 
-            result.Success.Should().BeFalse();
-            result.Message.Should().Be("Slot not found.");
+            // Assert
+            await act.Should().ThrowAsync<SlotNotFoundException>()
+                .WithMessage($"Slot with ID '{command.SlotId}' was not found.");
 
             _mockNotifier.Verify(n => n.SendAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
-        public async Task Should_Return_Failure_If_Slot_Is_Fully_Booked()
+        public async Task Should_Throw_SlotAlreadyBookedException_When_Slot_Is_Full()
         {
             var slot = new AppointmentSlot(Guid.NewGuid(), DateTime.UtcNow.AddHours(1), 2);
-            slot.Book();
-            slot.Book();
+            slot.Book(); slot.Book();
 
             _mockRepository.Setup(r => r.GetByIdAsync(slot.Id)).ReturnsAsync(slot);
 
             var command = new BookSlotCommand(slot.Id);
 
-            var result = await _handler.Handle(command, default);
+            var act = async () => await _handler.Handle(command, default);
 
-            result.Success.Should().BeFalse();
-            result.Message.Should().Be("Slot is fully booked.");
+            await act.Should().ThrowAsync<SlotAlreadyBookedException>()
+                .WithMessage($"Slot with ID '{slot.Id}' is already fully booked.");
 
             _mockNotifier.Verify(n => n.SendAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
         }

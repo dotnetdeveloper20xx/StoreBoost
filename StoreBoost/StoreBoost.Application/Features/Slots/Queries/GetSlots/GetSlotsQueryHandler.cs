@@ -1,7 +1,7 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Logging;
 using StoreBoost.Application.Common.Models;
 using StoreBoost.Application.Interfaces;
-using StoreBoost.Application.Features.Slots.Queries.GetSlots;
 
 namespace StoreBoost.Application.Features.Slots.Queries.GetSlots
 {
@@ -11,28 +11,42 @@ namespace StoreBoost.Application.Features.Slots.Queries.GetSlots
     public sealed class GetSlotsQueryHandler : IRequestHandler<GetSlotsQuery, ApiResponse<IReadOnlyList<SlotDto>>>
     {
         private readonly ISlotRepository _repository;
+        private readonly ILogger<GetSlotsQueryHandler> _logger;
 
-        public GetSlotsQueryHandler(ISlotRepository repository)
+        public GetSlotsQueryHandler(ISlotRepository repository, ILogger<GetSlotsQueryHandler> logger)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<ApiResponse<IReadOnlyList<SlotDto>>> Handle(GetSlotsQuery request, CancellationToken cancellationToken)
         {
-            var slots = await _repository.GetAllAsync();
+            _logger.LogInformation("Retrieving all slots...");
 
-            var dtoList = slots
-                .Select(slot => new SlotDto
-                {
-                    Id = slot.Id,
-                    StartTime = slot.StartTime,
-                    MaxBookings = slot.MaxBookings,
-                    CurrentBookings = slot.CurrentBookings,
-                    IsBooked = slot.IsBooked
-                })
-                .ToList();
+            try
+            {
+                var slots = await _repository.GetAllAsync();
 
-            return ApiResponse<IReadOnlyList<SlotDto>>.SuccessResult(dtoList);
+                var dtoList = slots
+                    .Select(slot => new SlotDto
+                    {
+                        Id = slot.Id,
+                        StartTime = slot.StartTime,
+                        MaxBookings = slot.MaxBookings,
+                        CurrentBookings = slot.CurrentBookings,
+                        IsBooked = slot.IsBooked
+                    })
+                    .ToList();
+
+                _logger.LogInformation("Successfully retrieved {Count} slots.", dtoList.Count);
+
+                return ApiResponse<IReadOnlyList<SlotDto>>.SuccessResult(dtoList);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving all slots.");
+                return ApiResponse<IReadOnlyList<SlotDto>>.FailureResult("An unexpected error occurred while retrieving slots.");
+            }
         }
     }
 }

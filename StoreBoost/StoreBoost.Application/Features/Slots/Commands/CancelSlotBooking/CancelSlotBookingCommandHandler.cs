@@ -1,5 +1,7 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Logging;
 using StoreBoost.Application.Common.Models;
+using StoreBoost.Application.Exceptions;
 using StoreBoost.Application.Interfaces;
 
 namespace StoreBoost.Application.Features.Slots.Commands.CancelSlotBooking
@@ -13,11 +15,16 @@ namespace StoreBoost.Application.Features.Slots.Commands.CancelSlotBooking
     {
         private readonly ISlotRepository _repository;
         private readonly INotificationService _notifier;
+        private readonly ILogger<CancelSlotBookingCommandHandler> _logger;
 
-        public CancelSlotBookingCommandHandler(ISlotRepository repository, INotificationService notifier)
+        public CancelSlotBookingCommandHandler(
+            ISlotRepository repository,
+            INotificationService notifier,
+            ILogger<CancelSlotBookingCommandHandler> logger)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -25,31 +32,36 @@ namespace StoreBoost.Application.Features.Slots.Commands.CancelSlotBooking
         /// </summary>
         public async Task<ApiResponse<bool>> Handle(CancelSlotBookingCommand request, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Cancel booking requested for SlotId: {SlotId}", request.SlotId);
+
             var slot = await _repository.GetByIdAsync(request.SlotId);
             if (slot == null)
-                return ApiResponse<bool>.FailureResult("Slot not found.");
+            {
+                _logger.LogWarning("Slot with ID {SlotId} not found", request.SlotId);
+                throw new SlotNotFoundException(request.SlotId);
+            }
 
             if (slot.CurrentBookings <= 0)
-                return ApiResponse<bool>.FailureResult("No bookings exist to cancel for this slot.");
-
-            try
             {
-                var userId = Guid.NewGuid(); // Replace with real user ID in production
-
-                slot.Cancel();
-
-                var updated = await _repository.UpdateAsync(slot);
-                if (!updated)
-                    return ApiResponse<bool>.FailureResult("Failed to persist slot cancellation.");
-
-                await _notifier.SendAsync(userId, $"Your booking for {slot.StartTime:t} was cancelled.");
-
-                return ApiResponse<bool>.SuccessResult(true, "Booking successfully cancelled.");
+                _logger.LogWarning("Attempt to cancel booking on SlotId {SlotId} which has no bookings", slot.Id);
+                throw new NoBookingsToCancelException(slot.Id);
             }
-            catch (Exception ex)
+
+            var userId = Guid.NewGuid(); // Replace with real user context later
+
+            slot.Cancel();
+
+            var updated = await _repository.UpdateAsync(slot);
+            if (!updated)
             {
-                return ApiResponse<bool>.FailureResult($"An unexpected error occurred: {ex.Message}");
+                _logger.LogError("Failed to persist cancellation for SlotId {SlotId}", slot.Id);
+                return ApiResponse<bool>.FailureResult("Failed to persist slot cancellation.");
             }
+
+            _logger.LogInformation("Booking successfully cancelled for SlotId {SlotId}", slot.Id);
+            await _notifier.SendAsync(userId, $"Your booking for {slot.StartTime:t} was cancelled.");
+
+            return ApiResponse<bool>.SuccessResult(true, "Booking successfully cancelled.");
         }
     }
 }

@@ -2,7 +2,8 @@
 using Moq;
 using StoreBoost.Application.Features.Slots.Commands.CancelSlotBooking;
 using StoreBoost.Application.Interfaces;
-
+using StoreBoost.Application.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace StoreBoost.Tests.Features.Slots.Commands.CancelSlotBooking
 {
@@ -10,43 +11,50 @@ namespace StoreBoost.Tests.Features.Slots.Commands.CancelSlotBooking
     {
         private readonly Mock<ISlotRepository> _mockRepository;
         private readonly Mock<INotificationService> _mockNotifier;
+        private readonly Mock<ILogger<CancelSlotBookingCommandHandler>> _mockLogger;
         private readonly CancelSlotBookingCommandHandler _handler;
 
         public CancelSlotBookingCommandHandlerTests()
         {
             _mockRepository = new Mock<ISlotRepository>();
             _mockNotifier = new Mock<INotificationService>();
-            _handler = new CancelSlotBookingCommandHandler(_mockRepository.Object, _mockNotifier.Object);
+            _mockLogger = new Mock<ILogger<CancelSlotBookingCommandHandler>>();
+
+            _handler = new CancelSlotBookingCommandHandler(
+                _mockRepository.Object,
+                _mockNotifier.Object,
+                _mockLogger.Object
+            );
         }
 
         [Fact]
-        public async Task Should_Return_Failure_If_Slot_Not_Found()
+        public async Task Should_Throw_SlotNotFoundException_When_Slot_Not_Exists()
         {
             var command = new CancelSlotBookingCommand(Guid.NewGuid());
 
             _mockRepository.Setup(repo => repo.GetByIdAsync(command.SlotId))
                 .ReturnsAsync((AppointmentSlot?)null);
 
-            var result = await _handler.Handle(command, default);
+            var act = async () => await _handler.Handle(command, default);
 
-            result.Success.Should().BeFalse();
-            result.Message.Should().Be("Slot not found.");
+            await act.Should().ThrowAsync<SlotNotFoundException>()
+                .WithMessage($"Slot with ID '{command.SlotId}' was not found.");
 
             _mockNotifier.Verify(n => n.SendAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
-        public async Task Should_Return_Failure_If_No_Bookings_To_Cancel()
+        public async Task Should_Throw_NoBookingsToCancelException_If_No_Bookings_Exist()
         {
             var slot = new AppointmentSlot(Guid.NewGuid(), DateTime.UtcNow.AddHours(1), maxBookings: 2);
             var command = new CancelSlotBookingCommand(slot.Id);
 
             _mockRepository.Setup(repo => repo.GetByIdAsync(slot.Id)).ReturnsAsync(slot);
 
-            var result = await _handler.Handle(command, default);
+            var act = async () => await _handler.Handle(command, default);
 
-            result.Success.Should().BeFalse();
-            result.Message.Should().Be("No bookings exist to cancel for this slot.");
+            await act.Should().ThrowAsync<NoBookingsToCancelException>()
+                .WithMessage($"Slot with ID '{slot.Id}' has no bookings to cancel.");
 
             _mockNotifier.Verify(n => n.SendAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
         }
