@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using StoreBoost.Application.Common.Models;
 using StoreBoost.Application.Features.Slots.Commands.BookSlot;
+using StoreBoost.Application.Features.Slots.Commands.CancelSlotBooking;
+using StoreBoost.Application.Features.Slots.Commands.CreateSlot;
 using StoreBoost.Application.Features.Slots.Queries.GetAvailable;
 using StoreBoost.Application.Features.Slots.Queries.GetSlots;
 
@@ -72,6 +74,49 @@ namespace StoreBoost.Api.Controllers
             var result = await _mediator.Send(new GetAvailableSlotsQuery());
             return Ok(result);
         }
+
+        /// <summary>
+        /// Cancels one booking for the specified slot, if possible.
+        /// </summary>
+        [HttpPost("{id}/cancel")]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CancelSlot(Guid id)
+        {
+            var result = await _mediator.Send(new CancelSlotBookingCommand(id));
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Creates a new appointment slot with a specified start time and maximum booking limit.
+        /// </summary>
+        /// <param name="command">The slot creation details including start time and max bookings.</param>
+        /// <returns>
+        /// 201 Created with slot ID if successful, or 400 BadRequest with validation/message failure.
+        /// </returns>
+        [HttpPost]
+        [ProducesResponseType(typeof(ApiResponse<Guid>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<Guid>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateSlot([FromBody] CreateSlotCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            // Handle validation or business rule failure
+            if (!result.Success)
+                return BadRequest(result);
+
+            // Success: Return 201 Created with the new slot's ID in the response
+            return CreatedAtAction(
+                nameof(GetAllSlots),
+                new { id = result.Data },
+                result
+            );
+        }
+
 
 
     }

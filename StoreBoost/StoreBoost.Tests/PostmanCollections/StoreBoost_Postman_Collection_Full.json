@@ -1,0 +1,127 @@
+{
+  "info": {
+    "name": "StoreBoost API - Full Feature Set",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Slots",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://localhost:7009/api/slots",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "port": "7009",
+          "path": [
+            "api",
+            "slots"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Available Slots",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://localhost:7009/api/slots/available",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "port": "7009",
+          "path": [
+            "api",
+            "slots",
+            "available"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Slot",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"startTime\": \"2025-08-01T14:00:00Z\",\n  \"maxBookings\": 3\n}"
+        },
+        "url": {
+          "raw": "https://localhost:7009/api/slots",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "port": "7009",
+          "path": [
+            "api",
+            "slots"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Book a Slot",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://localhost:7009/api/slots/{{slotId}}/book",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "port": "7009",
+          "path": [
+            "api",
+            "slots",
+            "{{slotId}}",
+            "book"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Cancel Slot Booking",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://localhost:7009/api/slots/{{slotId}}/cancel",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "port": "7009",
+          "path": [
+            "api",
+            "slots",
+            "{{slotId}}",
+            "cancel"
+          ]
+        }
+      }
+    }
+  ]
+}

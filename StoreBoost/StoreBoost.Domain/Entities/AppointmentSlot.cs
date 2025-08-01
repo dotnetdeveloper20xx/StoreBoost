@@ -47,9 +47,21 @@ public class AppointmentSlot
     }
 
     /// <summary>
-    /// Books the slot for one user. Throws if the slot is already fully booked.
+    /// Cancels a booking for this appointment slot by decrementing the current booking count.
     /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown if the slot is fully booked.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if there are no bookings to cancel (i.e., <c>CurrentBookings</c> is already 0).
+    /// </exception>
+    public void Cancel()
+    {
+        // Defensive check: don't allow cancellation if no bookings exist
+        if (CurrentBookings <= 0)
+            throw new InvalidOperationException("No bookings to cancel.");
+
+        // Reduce booking count by 1
+        CurrentBookings--;
+    }
+
     public void Book()
     {
         if (IsBooked)
@@ -57,4 +69,6 @@ public class AppointmentSlot
 
         CurrentBookings++;
     }
+
+
 }
