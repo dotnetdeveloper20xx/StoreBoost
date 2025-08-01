@@ -1,0 +1,73 @@
+{
+  "info": {
+    "name": "StoreBoost API - Multi-Booking Enabled",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Slots",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://localhost:7009/api/slots",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "port": "7009",
+          "path": [
+            "api",
+            "slots"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Available Slots",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://localhost:7009/api/slots/available",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "port": "7009",
+          "path": [
+            "api",
+            "slots",
+            "available"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Book a Slot",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://localhost:7009/api/slots/{{slotId}}/book",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "port": "7009",
+          "path": [
+            "api",
+            "slots",
+            "{{slotId}}",
+            "book"
+          ]
+        }
+      }
+    }
+  ]
+}

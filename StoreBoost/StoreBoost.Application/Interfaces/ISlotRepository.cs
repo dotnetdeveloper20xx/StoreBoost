@@ -1,5 +1,4 @@
-﻿using StoreBoost.Domain.Entities;
-
+﻿
 namespace StoreBoost.Application.Interfaces
 {
     public interface ISlotRepository

@@ -1,12 +1,12 @@
 ﻿using MediatR;
 using StoreBoost.Application.Common.Models;
 using StoreBoost.Application.Interfaces;
-
+using StoreBoost.Application.Features.Slots.Queries.GetSlots;
 
 namespace StoreBoost.Application.Features.Slots.Queries.GetSlots
 {
     /// <summary>
-    /// Handles the retrieval of all appointment slots.
+    /// Handles the retrieval of all appointment slots, including their booking limits and current status.
     /// </summary>
     public sealed class GetSlotsQueryHandler : IRequestHandler<GetSlotsQuery, ApiResponse<IReadOnlyList<SlotDto>>>
     {
@@ -26,6 +26,8 @@ namespace StoreBoost.Application.Features.Slots.Queries.GetSlots
                 {
                     Id = slot.Id,
                     StartTime = slot.StartTime,
+                    MaxBookings = slot.MaxBookings,
+                    CurrentBookings = slot.CurrentBookings,
                     IsBooked = slot.IsBooked
                 })
                 .ToList();

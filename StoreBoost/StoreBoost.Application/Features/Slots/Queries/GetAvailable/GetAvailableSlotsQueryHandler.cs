@@ -6,7 +6,7 @@ using StoreBoost.Application.Interfaces;
 namespace StoreBoost.Application.Features.Slots.Queries.GetAvailable
 {
     /// <summary>
-    /// Handles retrieval of available (unbooked) appointment slots.
+    /// Handles retrieval of available (not fully booked) appointment slots.
     /// </summary>
     public sealed class GetAvailableSlotsQueryHandler : IRequestHandler<GetAvailableSlotsQuery, ApiResponse<IReadOnlyList<SlotDto>>>
     {
@@ -26,6 +26,8 @@ namespace StoreBoost.Application.Features.Slots.Queries.GetAvailable
                 {
                     Id = slot.Id,
                     StartTime = slot.StartTime,
+                    MaxBookings = slot.MaxBookings,
+                    CurrentBookings = slot.CurrentBookings,
                     IsBooked = slot.IsBooked
                 })
                 .ToList();

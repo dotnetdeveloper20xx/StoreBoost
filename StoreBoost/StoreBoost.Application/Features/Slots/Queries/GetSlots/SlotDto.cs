@@ -13,6 +13,8 @@ namespace StoreBoost.Application.Features.Slots.Queries.GetSlots
     {
         public Guid Id { get; init; }
         public DateTime StartTime { get; init; }
+        public int MaxBookings { get; init; }
+        public int CurrentBookings { get; init; }
         public bool IsBooked { get; init; }
     }
 }

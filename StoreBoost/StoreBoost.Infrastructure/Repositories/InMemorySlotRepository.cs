@@ -1,17 +1,17 @@
 ﻿using StoreBoost.Application.Interfaces;
-using StoreBoost.Domain.Entities;
 
 namespace StoreBoost.Infrastructure.Repositories
 {
     /// <summary>
     /// In-memory implementation of ISlotRepository for testing/demo purposes.
+    /// Supports multiple bookings per slot.
     /// </summary>
     public class InMemorySlotRepository : ISlotRepository
     {
         private readonly List<AppointmentSlot> _slots = new();
 
         /// <summary>
-        /// Initializes with sample data: 10 slots from 9:00 AM, 30-min apart. Some pre-booked.
+        /// Initializes with seeded slot data.
         /// </summary>
         public InMemorySlotRepository()
         {
@@ -19,41 +19,43 @@ namespace StoreBoost.Infrastructure.Repositories
         }
 
         /// <summary>
-        /// Generates 10 slots from 9:00 AM, some of which are marked as booked.
+        /// Generates 30 demo slots starting from 9:00 AM at 30-minute intervals.
+        /// Each slot has a randomized max bookings limit (1–5),
+        /// and some are partially pre-booked to simulate real usage.
         /// </summary>
         private void SeedInitialData()
         {
             var baseTime = DateTime.Today.AddHours(9);
+            var random = new Random();
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 30; i++)
             {
-                var slot = new AppointmentSlot(Guid.NewGuid(), baseTime.AddMinutes(30 * i));
+                var id = Guid.NewGuid();
+                var startTime = baseTime.AddMinutes(i * 30);
+                var maxBookings = random.Next(1, 6); // Between 1 and 5
 
-                // Book slot 2 and 5 as defaults
-                if (i == 2 || i == 5)
+                var slot = new AppointmentSlot(id, startTime, maxBookings);
+
+                // Pre-book 0–3 random bookings to simulate usage
+                int preBooked = random.Next(0, Math.Min(4, maxBookings + 1));
+                for (int j = 0; j < preBooked; j++)
                 {
-                    slot.Book();
+                    try { slot.Book(); } catch { /* Ignore if max reached */ }
                 }
 
                 _slots.Add(slot);
             }
         }
 
-        /// <summary>
-        /// Returns all slots (available and booked).
-        /// </summary>
+        /// <inheritdoc />
         public Task<IReadOnlyList<AppointmentSlot>> GetAllAsync() =>
             Task.FromResult<IReadOnlyList<AppointmentSlot>>(_slots);
 
-        /// <summary>
-        /// Returns a slot by its ID.
-        /// </summary>
+        /// <inheritdoc />
         public Task<AppointmentSlot?> GetByIdAsync(Guid id) =>
             Task.FromResult(_slots.FirstOrDefault(s => s.Id == id));
 
-        /// <summary>
-        /// Adds a new slot, throws if duplicate ID exists.
-        /// </summary>
+        /// <inheritdoc />
         public Task AddAsync(AppointmentSlot slot)
         {
             if (_slots.Any(s => s.Id == slot.Id))
@@ -63,9 +65,7 @@ namespace StoreBoost.Infrastructure.Repositories
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Updates an existing slot if found.
-        /// </summary>
+        /// <inheritdoc />
         public Task<bool> UpdateAsync(AppointmentSlot slot)
         {
             var index = _slots.FindIndex(s => s.Id == slot.Id);
@@ -76,9 +76,7 @@ namespace StoreBoost.Infrastructure.Repositories
             return Task.FromResult(true);
         }
 
-        /// <summary>
-        /// Returns only the slots that are still available.
-        /// </summary>
+        /// <inheritdoc />
         public Task<IReadOnlyList<AppointmentSlot>> GetAvailableAsync()
         {
             var available = _slots.Where(s => !s.IsBooked).ToList();
@@ -86,8 +84,8 @@ namespace StoreBoost.Infrastructure.Repositories
         }
 
         /// <summary>
-        /// Resets and regenerates the in-memory slot list.
-        /// Useful for test cases or re-initializing demo data.
+        /// Clears and re-seeds the in-memory slot list.
+        /// Useful for testing.
         /// </summary>
         public void Reset()
         {
@@ -96,7 +94,7 @@ namespace StoreBoost.Infrastructure.Repositories
         }
 
         /// <summary>
-        /// Manually mark a slot as booked by ID (demo/testing only).
+        /// Manually books a slot by ID (demo/test only).
         /// </summary>
         public bool BookSlotById(Guid id)
         {
