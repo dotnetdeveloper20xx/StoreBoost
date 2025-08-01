@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using StoreBoost.Application.Interfaces;
 using StoreBoost.Infrastructure.Repositories;
+using StoreBoost.Infrastructure.Services;
 using System.Reflection;
 
 public static class DependencyInjection
@@ -12,6 +13,7 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
         services.AddSingleton<ISlotRepository, InMemorySlotRepository>();
+        services.AddSingleton<INotificationService, FakeNotificationService>();
 
         return services;
     }

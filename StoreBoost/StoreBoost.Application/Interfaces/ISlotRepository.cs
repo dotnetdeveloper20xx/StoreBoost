@@ -7,7 +7,9 @@ namespace StoreBoost.Application.Interfaces
         Task<AppointmentSlot?> GetByIdAsync(Guid id);
         Task<bool> UpdateAsync(AppointmentSlot slot);
         Task AddAsync(AppointmentSlot slot);
-        Task<IReadOnlyList<AppointmentSlot>> GetAvailableAsync(); 
+        Task<IReadOnlyList<AppointmentSlot>> GetAvailableAsync();
+        Task<bool> IsOverlappingSlotExistsAsync(DateTime startTime);
+
     }
 
 }

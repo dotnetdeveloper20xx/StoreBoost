@@ -105,5 +105,32 @@ namespace StoreBoost.Infrastructure.Repositories
             slot.Book();
             return true;
         }
+
+        /// <summary>
+        /// Checks if there is already a slot that overlaps with the proposed start time.
+        /// Assumes all slots are 30 minutes long.
+        /// </summary>
+        /// <param name="startTime">The proposed start time for the new slot.</param>
+        /// <returns>True if a conflict exists; otherwise, false.</returns>
+        public Task<bool> IsOverlappingSlotExistsAsync(DateTime startTime)
+        {
+            const int slotDurationMinutes = 30;
+
+            // Calculate proposed slot's end time
+            var proposedEndTime = startTime.AddMinutes(slotDurationMinutes);
+
+            // Check for overlap with existing slots
+            var conflict = _slots.Any(existing =>
+            {
+                var existingEnd = existing.StartTime.AddMinutes(slotDurationMinutes);
+
+                // Overlap occurs if start < existingEnd AND existingStart < proposedEnd
+                return startTime < existingEnd && existing.StartTime < proposedEndTime;
+            });
+
+            return Task.FromResult(conflict);
+        }
+
+
     }
 }
