@@ -10,106 +10,33 @@ Your task is to implement the appointment booking feature.
 - The user interface must update to show the new "Booked" status without needing to refresh the page.
 - Once a slot is "Booked," clicking on it again should have no effect. 
 
+## ✅ Completed So Far
 
-# 🧪 StoreBoost Backend Setup Summary – Technical Test Report
+### 📆 Slot Management
+- Create appointment slots with custom start time and maximum booking capacity  
+- Prevent overlapping slots (enforced 30-minute interval)  
+- Track current bookings for each slot  
 
-This document summarizes the technical backend setup process of the **StoreBoost** project using modern .NET and Clean Architecture principles. It outlines the steps taken, decisions made, and challenges encountered — useful for assessment and marking purposes.
+### 🧍‍♂️ User Booking Flow
+- View all slots via `GET /api/slots`  
+- View only available slots via `GET /api/slots/available`  
+- Book available slots via `POST /api/slots/{id}/book`  
+- Prevent overbooking  
+- Cancel bookings via `POST /api/slots/{id}/cancel`  
+- Prevent cancellation of unbooked slots  
 
----
+### 🛎️ Notification System
+- Inline notifications for:  
+  - Booking confirmation  
+  - Slot full warning  
+  - Cancellation confirmation  
+- Implemented `INotificationService` abstraction (easily replaceable with real services like email/SMS)  
 
-## ✅ Summary of Setup Steps
-
-### 🔹 1. Cloned Repository
-- **Action**: Cloned `https://github.com/dotnetdeveloper20xx/StoreBoost`
-- **Purpose**: To initialize local development based on the remote GitHub repository.
-
----
-
-### 🔹 2. Structured Clean Architecture Projects
-Projects Created:
-- `StoreBoost.Api` – Web API entry point
-- `StoreBoost.Application` – Business logic (CQRS, MediatR, Validation)
-- `StoreBoost.Domain` – Domain entities and rules
-- `StoreBoost.Infrastructure` – Repository implementations, services
-- `StoreBoost.Persistence` – Data access layer (in-memory for now)
-- `StoreBoost.Shared` – DTOs, error handling, common constants
-
-**Goal**: Follow SOLID & Clean Architecture to promote modularity and testability.
-
----
-
-### 🔹 3. Verified Project References
-- **Command Used**: `dotnet list StoreBoost.Api reference`
-- **Result**: Confirmed correct references to all required layers.
-
----
-
-### 🔹 4. Installed Required NuGet Packages
-Installed into relevant projects:
-- `MediatR.Extensions.Microsoft.DependencyInjection`
-- `FluentValidation`
-- `FluentValidation.AspNetCore`
-- `Microsoft.Extensions.DependencyInjection`
-
-**Purpose**: Enable CQRS, request validation, and modular DI.
-
----
-
-### 🔹 5. Created DI Extension Methods
-Added:
-- `AddApplication()` → in `StoreBoost.Application`
-- `AddPersistence()` → in `StoreBoost.Persistence`
-
-**Registered in `Program.cs`** to wire up services.
-
----
-
-## ❗ Challenges & Resolutions
-
-### 🐞 Challenge 1: `AddValidatorsFromAssembly` Not Found
-- **Cause**: `FluentValidation.AspNetCore` not installed in `Api` project.
-- **Fix**:
-  - Installed `FluentValidation.AspNetCore` in `StoreBoost.Api`
-  - Registered validators directly in `Program.cs`
-
-### 🐞 Challenge 2: `AddPersistence()` Not Found
-- **Cause**: Missing `using StoreBoost.Persistence;` in top-level `Program.cs`
-- **Fix**:
-  - Added required `using` directive
-  - Ensured method was `public static` and correctly namespaced
-  - Rebuilt the solution
-
----
-
-## 📌 Current State of `Program.cs`
-
-```
-using StoreBoost.Application;
-using StoreBoost.Infrastructure;
-using StoreBoost.Persistence;
-using FluentValidation;
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddApplication();
-builder.Services.AddInfrastructure();
-builder.Services.AddPersistence();
-builder.Services.AddValidatorsFromAssembly(typeof(SomeValidator).Assembly);
-```
-
----
-
-## 🚀 Next Steps (Implementation)
-
-1. Define `AppointmentSlot` domain model
-2. Create `ISlotRepository` interface
-3. Implement `InMemorySlotRepository`
-4. Expose `GET /api/slots` and `POST /api/slots/{id}/book` endpoints
-5. Introduce CQRS with `BookSlotCommand` and `GetSlotsQuery`
-6. Add FluentValidation validators
-7. Write Unit + Integration tests
-
----
-
-**Result**: Solid foundational setup for a professional, scalable backend, ready for further feature implementation.
+### 🧪 Testing & Architecture
+- Clean Architecture (Domain, Application, Infrastructure, API)  
+- CQRS with MediatR  
+- Dependency Injection  
+- Validators with FluentValidation  
+- Unit tests using xUnit, Moq, FluentAssertions  
+- Postman collection to test all endpoints  
 
