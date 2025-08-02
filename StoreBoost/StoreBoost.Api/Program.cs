@@ -13,7 +13,18 @@ builder.Services.AddPersistence();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-//  Swagger setup with XML comments support
+// CORS configuration for frontend on localhost:5173
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+// Swagger setup with XML comments support
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -30,15 +41,18 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-//  Global exception handler
+// Apply CORS policy (must come before MapControllers)
+app.UseCors("AllowFrontend");
+
+// Global exception handler
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-//  Swagger middleware (enabled in all environments)
+// Swagger middleware (enabled in all environments)
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "StoreBoost API v1");
-    c.RoutePrefix = string.Empty; // Makes Swagger UI available at root (/)
+    c.RoutePrefix = string.Empty;
 });
 
 app.UseHttpsRedirection();
